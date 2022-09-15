@@ -13,6 +13,11 @@ public class PlayerController : MonoBehaviour
 
     private Vector2 mouseDelta;
 
+    private void Start()
+    {
+        Cursor.lockState = CursorLockMode.Locked;
+    }
+
     private void LateUpdate()
     {
         CameraLook();
