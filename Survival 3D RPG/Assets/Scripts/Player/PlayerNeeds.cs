@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Events;
 
 public class PlayerNeeds : MonoBehaviour
 {
@@ -12,6 +13,8 @@ public class PlayerNeeds : MonoBehaviour
 
     public float hungerHealthDecay;
     public float thirstHealthDecay;
+
+    public UnityEvent onTakeDamage;
 
     private void Start()
     {
@@ -24,10 +27,8 @@ public class PlayerNeeds : MonoBehaviour
 
     private void Update()
     {
-        //reduce needs over time
-        hunger.Subtract(hunger.decayRate * Time.deltaTime);
-        thirst.Subtract(thirst.decayRate * Time.deltaTime);
-        sleep.Add(sleep.regenerate * Time.deltaTime);
+        //increase needs over time
+        IncreaseNeeds();
 
         //reduce health if hungry
         if (hunger.currentValue == 0)
@@ -41,7 +42,26 @@ public class PlayerNeeds : MonoBehaviour
             health.Subtract(thirstHealthDecay * Time.deltaTime);
         }
 
+        //check if a player is dead
+        if (health.currentValue == 0.0f)
+        {
+            Die();
+        }
+
         //update UI bars
+        UpdateUIBars();
+        
+    }
+
+    public void IncreaseNeeds()
+    {
+        hunger.Subtract(hunger.decayRate * Time.deltaTime);
+        thirst.Subtract(thirst.decayRate * Time.deltaTime);
+        sleep.Add(sleep.regenerate * Time.deltaTime);
+    }
+
+    public void UpdateUIBars()
+    {
         health.uiBar.fillAmount = health.GetPercentage();
         hunger.uiBar.fillAmount = hunger.GetPercentage();
         thirst.uiBar.fillAmount = thirst.GetPercentage();
@@ -50,32 +70,33 @@ public class PlayerNeeds : MonoBehaviour
 
     public void Heal(float amount)
     {
-
+        health.Add(amount);
     }
 
     public void Eat(float amount)
     {
-
+        hunger.Add(amount);
     }
 
     public void Drink(float amount)
     {
-
+        thirst.Add(amount);
     }
 
     public void Sleep(float amount)
     {
-
+        sleep.Subtract(amount);
     }
 
     public void TakeDamage(int amount)
     {
-
+        health.Subtract(amount);
+        onTakeDamage?.Invoke();
     }
 
     public void Die()
     {
-
+        Debug.Log("Player is dead.");
     }
 }
 
